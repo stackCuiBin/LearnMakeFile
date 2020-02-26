@@ -1,0 +1,11 @@
+x := foo
+y := $(x)
+
+x := new
+y += $(x)
+
+.PHONY : test
+test : 
+	@echo "x => $(x)"
+	@echo "y => $(y)"
+

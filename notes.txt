@@ -1,0 +1,182 @@
+第1课
+1，make是一个应用程序
+	解析源程序之间的依赖关系
+	根据依赖关系自动维护编译工作
+	执行宿主操作系统中的各种命令
+
+2，makefile是一个描述文件
+	定义一系列的规则来指定源文件编译的先后顺序
+	拥有特定的语法规则，支持函数定义和函数调用
+	能够直接集成操作系统中的各种命令
+
+3，最简单的makefile示例
+	hello：
+		echo "hello makefile"
+	目标	实现目标所执行的命令
+注意：目标后的命令需要用tab键('\t')隔开。
+
+4，make程序的使用示例
+	make -f mf.txt hello
+功能说明：
+	以hello关键字作为目标查找mf.txt文件，并执行hello处的命令。
+
+5，make程序的简写示例
+	make hello
+功能说明：
+	以hello关键字作为目标查找makefile或者Makefile文件，并执行hello处的命令。
+
+	make
+功能说明：
+	查找makefile或Makefile文件中最顶层目标，并执行最顶层目标的命令。
+
+小结：
+	make只是一个特殊功能的应用程序
+	make用于根据指定的目标执行相应的命令
+	makefile用于定义目标和实现目标所需的命令
+	makefile有特定的语法规则，支持函数定义和调用
+
+第2课
+1，makefile的意义
+	makefile用于定义源文件间的依赖关系
+	makefile说明如何编译各个源文件并生成可执行文件
+依赖的定义：
+	targets : prerequistes ; command1
+		('\t')command2
+
+2, makefile中的元素含义
+	targets
+		通常是需要生成的目标文件名
+		make所需执行的命令名称
+	prerequisites
+		当前目标所依赖的其它目标或文件
+	command
+		完成目标所需要执行的命令
+
+3，规则中的注意事项
+	targets可以包含多个目标
+		使用空格对多个目标名进行分隔
+	prerequisites可以包含多个依赖
+		使用空格对多个依赖进行分隔
+	tab键：'\t'
+		每一个命令行必须以tab字符开始
+		tab字符告诉make此行是一个命令行
+	续行符：\
+		可以将内容分开写到下一行，提高可读性
+
+4，依赖规则
+	当目标对应的文件不存在，执行对应命令
+	当依赖在时间上比目标更新，执行对应命令
+	当依赖关系连续发生时，对比依赖链上的每一个目标
+
+5，小技巧
+	makefile中可以在命令前加上@符，作用为命令无回显
+	工程开发中可以将最终可执行文件名和all同时作为makefile中第一条规则的目标。
+	hello.out all : main.c
+		gcc -o hello.out main.o
+
+小结：
+	makefile用于定义原文件间的依赖关系
+	makefile说明如何编译各个源文件并生成可执行文件
+	makefile中的目标之间存在连续依赖关系
+	依赖存在并且命令执行成功时目标完成的充要条件
+
+第3课
+1，makefile中的伪目标
+	通过.PHONY关键字声明一个伪目标
+	伪目标不对应任何实际的文件
+	不管伪目标的依赖是否更新，命令总是执行
+
+2，伪目标的语法：先声明，后使用
+	本质：
+	伪目标是make中的特殊目标.PHONY的依赖
+	.PHONY : clean
+	## 注释 ##
+	clean :
+		command
+
+3, 伪目标的妙用：规则调用(函数调用)
+	.PHONY : clean rebuild all
+	## other rules ##
+	rebuild : clean all
+	clean : 
+		command
+原理：当一个目标的依赖包含伪目标时伪目标所定义的命令总是会被执行。
+
+技巧：绕开.PHONY关键字定义伪目标
+原理：如果一个规则没有命令或者依赖，并且它的目标不是一个存在的文件名；
+在执行此规则时，目标总会被认为是最新的。
+	clean : FORCE
+		command
+	FORCE :
+
+第4课
+makefile中支持程序设计语言中变量的概念
+makefile中的变量只代表文本数据(字符串)
+makefile中的变量名规则
+	- 变量名可以包含字符，数字，下划线
+	- 不能包含":","#","="或" "
+	- 变量名大小写敏感
+	
+1，变量的定义和使用
+	CC := gcc
+	TARGET := hello.out
+	
+	$(TARGET) : main.o
+		$(CC) -o $(TARGET) main.o
+
+2, makefile中变量赋值方式
+	- 简单赋值( := )
+	- 递归赋值( = )
+	- 条件赋值( ?= )
+	- 追加赋值( += )
+
+3, 简单赋值
+	程序设计语言中的通用的赋值方式
+	只针对当前语句的变量有效
+	x := foo
+	y := $(x)b
+	x := new
+	.PHONY : test
+	test :
+		@echo "x => $(x)"
+		@echo "y => $(y)"
+	输出： x => new; y => foob
+	
+4, 递归赋值
+	赋值操作可能影响多个其它变量
+	所有与目标变量相关的其它变量都将受到影响
+	x := foo
+	y := $(x)b
+	x := new
+	输出： x => new; y => newb
+	
+5，条件赋值
+	如果变量未定义，使用赋值符号中的值定义变量
+	如果变量已经定义，赋值无效
+	x := foo
+	y := $(x)b
+	x ?= new
+	输出： x => foo; y => foob
+	
+6，追加赋值
+	原变量之后加上一个新值
+	原变量值与新值之间由空格隔开
+	x := foo
+	y := $(x)b
+	x += $(y)
+	输出： x => foo foob; y => foob
+	
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
