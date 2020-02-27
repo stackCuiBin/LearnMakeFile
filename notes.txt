@@ -166,13 +166,88 @@ makefile中的变量名规则
 	x += $(y)
 	输出： x => foo foob; y => foob
 	
+第5课
+1，预定义变量的使用
+在makefile中存在一些预定义的变量
+	自动变量
+		$@ 当前规则中触发命令被执行的目标
+		$^ 当前规则中的所有依赖
+		$< 当前规则中的第一个依赖
+	特殊变量
+		$(MAKE) 当前make解释器的文件名
+		$(NAKECMDGOALS) 命令行中指定的目标名(make的命令行参数)
+		$(MAKEFILE_LIST) make所需要处理的makefile文件列表，当前makefile的文件名总是位于列表最后
+						文件名之间以空格进行分隔
+		$(MAKE_VERSION) 当前make解释器的版本
+		$(CURDIR) 当前make解释器的工作目录
+		$(.VARIABLES) 所有已定义的变量名列表(预定义变量和自定义变量)
+		...
 
+示例：
+	all : first second third
+		@echo "\$$@ => $@"
+		@echo "$$^ => $^"
+		@echo "$$< => $<"
+		
+注意：
+1，"$"对于makefile有特殊含义，输出时需要加上一个"$"
+2，"$@"对于Base Shell有特殊含义，输出时需要加上"\"进行转义
 
+第6课
+1，变量值的替换
+	使用指定字符(串)替换变量值中的后缀字符(串)
+	语法格式：$(var:a=b)或${var:a=b}
+		替换表达式中不能有任何的空格
+		make中支持使用${}对变量进行取值
+		
+2，变量的模式替换
+	使用%保留变量值中的指定字符，替换其它字符
+	语法格式: $(var:a%b=x%y)或${var:a%b=x%y}
+		替换表达式中不能有任何的空格
+		make中支持使用${}对变量进行取值
+		
+3，规则中的模式替换
+	targets : target-pattern : prereq-pattern
+		command1
+		command2
+		...
+意义：通过target-pattern从targets中匹配子目标；在通过prereq-pattern
+从子目标生成依赖；进而构成完整的规则。
+示例：
+	OBJS := func.o main.o
+	$(OBJS) : %.o : %.c
+		gcc -o $@ -c $^
+等价于
+	func.o : func.c
+		gcc -o $@ -c $^
+	main.o : main.c
+		gcc -o $@ -c $^
 
-
-
-
-
+4，变量值的嵌套引用
+	一个变量名之中可以包含对其它变量的引用
+	嵌套引用的本质是使用一个变量表示另外一个变量
+	x := y
+	y := z
+	a := $($(x))
+	=> a := $(y) => a := z
+	
+5，命令行变量
+	运行make时，在命令行定义变量
+	命令行变量默认覆盖makefile中定义的变量
+	
+6，override关键字
+	用于指示makefile中定义的变量不能被覆盖
+	变量的定义和赋值都需要使用override关键字
+	
+7，define关键字
+	用于在makefile中定义多行变量
+	多行变量的定义从变量名开始到endef结束
+	可使用override关键字防止变量被覆盖
+	define定义的变量等价于使用 = 定义的变量
+override define cmd
+	@echo "run cmd ls ..."
+	@echo ls
+endef
 
 
 
