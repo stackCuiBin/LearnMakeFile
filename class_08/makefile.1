@@ -1,0 +1,39 @@
+.PHONY : test
+
+var1 := 
+var2 := $(var1)
+var3 =
+var4 = $(var3)
+
+test :
+#notice : no tab before ifeq
+    ifdef var1
+		@echo "var1 is defined"
+    else
+		@echo "var1 is NOT defined"
+    endif
+
+    ifdef var2
+		@echo "var2 is defined"
+    else
+		@echo "var2 is NOT defined"
+    endif
+
+    ifdef var3
+		@echo "var3 is defined"
+    else
+		@echo "var3 is NOT defined"
+    endif
+
+    ifdef var4
+		@echo "var4 is defined"
+    else
+		@echo "var4 is NOT defined"
+    endif
+
+# result
+# var1 is NOT defined
+# var2 is NOT defined
+# var3 is NOT defined
+# var4 is defined
+

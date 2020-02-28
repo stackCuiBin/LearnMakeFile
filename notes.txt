@@ -234,6 +234,7 @@ makefile中的变量名规则
 5，命令行变量
 	运行make时，在命令行定义变量
 	命令行变量默认覆盖makefile中定义的变量
+	注意：命令行变量不能有空格(a:=b)
 	
 6，override关键字
 	用于指示makefile中定义的变量不能被覆盖
@@ -249,9 +250,107 @@ override define cmd
 	@echo ls
 endef
 
+第7课
+1，环境变量(全局变量)
+	makefile中能够直接使用环境变量的值
+		定义了同名变量，环境变量将被覆盖
+		运行make时指定"-e"选项，优先使用环境变量
+	为什么要在makefile中使用环境变量？
+		优势：环境变量可以在所有makefile中使用
+		劣势：过多的依赖于环境变量会导致移植性降低
+		
+2，变量在不同makefile之间的传递方式
+	直接在外部定义环境变量进行传递
+	使用export定义比那辆进行传递(定义临时环境变量)
+	定义make命令行变量进行传递(推荐)
 
+3，目标变量(局部变量)
+	作用域只在指定目标及连带规则中
+	target : name <assignment> value
+	target : override name <assignment> value
+	
+4，模式变量
+	模式变量是目标变量的扩展
+	作用域只在符合模式的目标及连带规则中
+	pattern : name <assignment> value
+	pattern : override name <assignment> value
+	
+第8课
+1，makefile中支持条件判断语句
+	可以根据条件的值来决定make的执行
+	可以比较两个不同变量或者变量和常量值
+	if*** (arg1,arg2)
+	# for true
+	else
+	# for false
+	endif
+注意事项：条件判断语句只能用于控制make实际执行的语句；但是不能控制规则中命令的执行过程。
 
+2，条件判断语句语法说明
+	常用形式
+		if*** (arg1,arg2)
+	其它合法形式
+		if*** "arg1" "arg2"
+		if*** 'arg1' "arg2"
+		if*** "arg1" 'arg2'
+		if*** 'arg1' 'arg2'
+注意：
+	 	   		不能有空格(arg1,arg2)
+[space]if***[space](arg1,arg2)[space]    
 
+3，条件判断关键字
+	ifeq	判断参数是否相等，相等为true，否则为false
+	ifneq	判断参数是否不相等，不相等为true，否则为false
+	ifdef	判断变量是否有值，有值为true，否则为false
+	ifndef	判断参数是否没有值，没有值为true，否则为false
 
- 
+4，工程经验
+	条件判断语句之前可以有空格，但不能有Tab字符('\t')
+	在条件语句中不要使用自动变量($@, $^, $<)
+	一条完整的条件语句必须位于同一个makefile中
+	条件判断类似C语言中的宏，预处理阶段有效，执行阶段无效
+	make在加载makefile时
+		首先计算表达式的值(赋值方式不同，计算方式不同)
+		根据判断语句的表达式决定执行的内容
+		
+第9课
+1，makefile中支持函数的概念
+	make解释器提供了一系列的函数供makefile调用
+	在makefile中支持自定义函数实现，并调用执行
+	通过define关键字实现自定义函数
+	
+2，自定义函数语法
+函数定义：
+	define func1
+		@echo "My name is $(0)."
+	endef
+	
+	define func2
+		@echo "My name is $(0)."
+		@echo "Param => $(1)"
+	endef
+	
+函数调用：
+	test :
+		$(call func1)
+		$(call func2, chichi)
+
+3，深入理解自定义函数
+	自定义函数是一个多行变量，无法直接调用
+	自定义函数是一种过程调用，没有任何的返回值
+	定义函数用于定义命令集合，并应用于规则中
+
+4，make解释器中的预定义函数
+	make的函数提供了处理文件名，变量和命令的函数
+	可以在需要的地方调用函数来处理指定的参数
+	函数在调用的地方被替换为处理结果
+5, 预定义函数的调用
+	var := $(func_name arg1,arg2, ...)
+	为什么和自定义函数调用方式不同？
+	本质剖析：
+		makefile中不支持真正意义上的自定义函数
+		自定义函数的本质是多行变量
+		预定义的call函数在调用时将参数传递给多行变量
+		自定义函数是call函数的实参，并在call中被执行
+
 

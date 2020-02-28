@@ -1,0 +1,23 @@
+
+var := my-var
+new := chichi
+
+test : var := test-var
+%e : override new := cuibb
+
+test : another
+	@echo "test:"
+	@echo "var => $(var)"
+	@echo "new => $(new)"
+
+another :
+	@echo "another:"
+	@echo "var => $(var)"
+	@echo "new => $(new)"
+
+rule :
+	@echo "rule:"
+	@echo "var => $(var)"
+	@echo "new => $(new)"
+
+
