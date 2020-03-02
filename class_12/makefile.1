@@ -1,0 +1,17 @@
+
+.PHONY : all wrong clean
+
+all :
+	set -e; \
+	mkdir test; \
+	cd test; \
+	mkdir subtest
+	
+wrong :
+	mkdir test
+	cd test
+	mkdir subtest
+	
+clean :
+	rm -rf test subtest
+

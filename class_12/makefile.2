@@ -1,0 +1,23 @@
+
+.PHONY : all clean
+
+MKDIR := mkdir
+RM := rm -rf
+CC := gcc
+
+SRCS := $(wildcard *.c)
+DEPS := $(SRCS:.c=.dep)
+
+# add '-' to remove worning
+-include $(DEPS)
+
+all :
+	@echo "this is $@"
+	
+%.dep : %.c
+	@echo "create $@ ..."
+	@$(CC) -MM -E $^ | sed 's,\(.*\)\.o[ :]*,objs/\1.o : ,g' > $@
+
+clean :
+	$(RM) *.dep
+

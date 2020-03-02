@@ -1,0 +1,12 @@
+
+.PHONY : all
+
+-include test.txt
+
+all : 
+	@echo "$@ : $^"
+	
+test.txt : b.txt
+	@echo "create $@..."
+	@echo "all : c.txt" > test.txt
+
