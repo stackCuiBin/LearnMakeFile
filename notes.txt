@@ -606,8 +606,88 @@ endef
 	后缀规则是一种旧式的规则模式
 	后缀规则正逐步被模式规则取代
 	
+第17课 make中的路径搜索-上
+1，特殊的预定义变量VPATH(全大写)
+	VPATH变量的值用于指示make如何查找文件
+	不同文件夹可作为VPATH的值同时出现
+	文件夹的名字之间需要使用分隔符进行区分
+		例1： VPATH := inc src (空格)
+		例2： VPATH := inc;src (分号)
+		例3： VPATH := inc : src (冒号)
 	
+2，make对于VPATH值的处理方式
+	当前文件夹找不到需要的文件时，VPATH会被使用
+	make会在VPATH指定的文件夹中依次搜索文件
+	当多个文件夹存在同名文件时，选择第一次搜索到的文件
+注意事项：
+	VPATH只能决定make的搜索路径，无法决定命令的搜索路径
+	对于特定的编译命令(gcc)，需要独立指定编译搜索路径
+		gcc -I include-path
+		
+3，VPATH存在的问题
+	当inc文件夹中意外出现源文件(c/cpp文件)，那么可能产生编译错误！
+替换方案：
+	vpath关键字(全小写)
+	为不同类型的文件指定不同的搜索路径
+	语法：
+		在Directory中搜索符合Pattern的规则文件
+		vpath Pattern Directory
+		例： vpath %.h inc
+			 vpath %.c src
+			 
+4，取消搜索规则
+	取消已经设置的某个搜索规则
+		vpath Pattern
+	例：vpath %.h inc   # 在inc中搜索.h文件 
+		vpath %.h	    # 不在到inc中搜索.h文件
 	
+	取消所有已设置的规则
+		vpath
+		
+小结
+	VPATH变量用于指示make如何查找文件
+	make会在VPATH指定的文件夹中依次搜索文件
+	vpath关键字可以为不同类型的文件指定不同的搜索路径
+	vpath比VPATH更灵活易用，可动态设置/取消搜索路径
+
+第18课 make中的路径搜索-下
+1，当makefile中同时出现VPATH、vpath会怎么样
+实验结论：
+	make首先在当前文件夹搜索需要的文件
+	如果失败：
+		make优先在vpath指定的文件夹中搜索目标文件
+		当vpath搜索失败时，转而搜索VPATH指定的文件夹
+		
+2，当使用vpath对同一个Pattern指定多个文件夹时，make会如何处理？
+实验结论
+	make首先在当前文件夹搜索需要的文件
+	如果失败
+		make以自上而下的顺序搜索vpath指定的文件夹
+		当找到目标文件，搜索结束
+		
+3，通过VPATH指定搜索路径后，make如何决定目标文件的最终位置？
+实验结论
+	当app.out完全不存在
+		make在当前文件下创建app.out
+	当src文件夹中存在app.out
+		所有目标和依赖的新旧关系不变，make不会重新创建app.out
+		当依赖文件被更新，make在当前文件夹下创建app.out
+
+4，当依赖文件更新时，如何将目标文件在src中更新？
+解决方案：
+	使用GPATH特殊变量指定目标文件夹
+	GPATH:=src
+		当app.out完全不存在
+			make默认在当前文件夹创建app.out
+		当app.out存在于src，且依赖文件被更新
+			make在src中创建app.out
+			
+5，工程项目中的几点建议
+	尽量使用vpath为不同文件指定搜索路径
+	不要在源码文件夹中生成目标文件
+	为编译得到的结果创建独立的文件夹
+	避免VPATH和GPATH特殊变量的使用
+
 	
 	
 	

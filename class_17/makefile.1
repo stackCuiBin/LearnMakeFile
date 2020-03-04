@@ -1,0 +1,24 @@
+
+CC := gcc
+
+OBJS := func.o main.o
+
+INC := inc
+SRC := src
+
+CFLAGS := -I $(INC)
+
+vpath %.h $(INC)
+vpath %.c $(SRC)
+
+app.out : $(OBJS)
+	$(CC) -o $@ $^
+	$(RM) $^
+	@echo "Target => $@"
+
+# vpath %.h
+
+$(OBJS) : %.o : %.c func.h
+	$(CC) $(CFLAGS) -o $@ -c $<
+
+
