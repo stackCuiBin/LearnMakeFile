@@ -10,12 +10,10 @@
 #include "common.h"
 #include "func.h"
 
-//#include "dlib_test.h"
-//#include "slib_test.h"
+#include "dlib_test.h"
+#include "slib_test.h"
 
 extern void module_test();
-extern void slib_test();
-extern void dlib_test();
 
 int main()
 {
